@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Password Generator</title>
+    <style>
+        /* Styling for modern look */
+        body {
+            background: #f3f4f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            margin-top: 12px;
+            color: #555;
+        }
+
+        input[type="number"], input[type="text"] {
+            margin-top: 8px;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            accent-color: #4CAF50;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            justify-content: space-between;
+        }
+
+        .checkbox-label:hover {
+            background-color: #ececec;
+        }
+
+        .info-button {
+            background-color: #e7e7e7;
+            border: none;
+            padding: 3px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            margin-left: 10px;
+            width: 18px;
+            height: 18px;
+            text-align: center;
+            line-height: 12px;
+        }
+
+        .checkbox-label span {
+            font-size: 16px;
+            color: #333;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 12px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #password-output {
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #f1f1f1;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            word-break: break-all;
+            min-height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tooltip {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            color: #fff;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .info-button:hover + .tooltip {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Password Generator</h2>
+        <form id="password-form">
+            <label for="length">Password Length</label>
+            <input type="number" id="length" value="12" min="4" max="64">
+
+            <label class="checkbox-label" for="include-upper">
+                <input type="checkbox" id="include-upper" checked>
+                <span>Include Uppercase Letters</span>
+                <button type="button" class="info-button">i</button>
+                <div class="tooltip">A-Z</div>
+            </label>
+
+            <label class="checkbox-label" for="include-numbers">
+                <input type="checkbox" id="include-numbers" checked>
+                <span>Include Numbers</span>
+                <button type="button" class="info-button">i</button>
+                <div class="tooltip">0-9</div>
+            </label>
+
+            <label class="checkbox-label" for="include-specials">
+                <input type="checkbox" id="include-specials" checked>
+                <span>Include Special Characters</span>
+                <button type="button" class="info-button">i</button>
+                <div class="tooltip">!@#$%^&*()_+~`|}{[]:;?><,./-=</div>
+            </label>
+
+            <label class="checkbox-label" for="exclude-similar">
+                <input type="checkbox" id="exclude-similar">
+                <span>Exclude Similar Characters</span>
+                <button type="button" class="info-button">i</button>
+                <div class="tooltip">I, l, 1, O, 0</div>
+            </label>
+
+            <label class="checkbox-label" for="exclude-vowels">
+                <input type="checkbox" id="exclude-vowels">
+                <span>Exclude Vowels</span>
+                <button type="button" class="info-button">i</button>
+                <div class="tooltip">a, e, i, o, u</div>
+            </label>
+
+            <label class="checkbox-label" for="exclude-ambiguous">
+                <input type="checkbox" id="exclude-ambiguous">
+                <span>Avoid Ambiguous Characters</span>
+                <button type="button" class="info-button">i</button>
+                <div class="tooltip">{ } [ ] ( ) / \ ' " ~ , ; : . < ></div>
+            </label>
+
+            <button type="button" onclick="generatePassword()">Generate Password</button>
+            <button type="button" onclick="copyToClipboard()">Copy to Clipboard</button>
+        </form>
+
+        <div id="password-output">Generated password will appear here...</div>
+    </div>
+
+    <script>
+        function generatePassword() {
+            const length = document.getElementById('length').value;
+            const includeUpper = document.getElementById('include-upper').checked;
+            const includeNumbers = document.getElementById('include-numbers').checked;
+            const includeSpecials = document.getElementById('include-specials').checked;
+            const excludeSimilar = document.getElementById('exclude-similar').checked;
+            const excludeVowels = document.getElementById('exclude-vowels').checked;
+            const excludeAmbiguous = document.getElementById('exclude-ambiguous').checked;
+
+            let characterSet = 'abcdefghijklmnopqrstuvwxyz';
+            if (includeUpper) characterSet += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            if (includeNumbers) characterSet += '0123456789';
+            if (includeSpecials) characterSet += '!@#$%^&*()_+~`|}{[]:;?><,./-=';
+            
+            // Exclude similar characters
+            if (excludeSimilar) {
+                characterSet = characterSet.replace(/[Il1O0]/g, '');
+            }
+            
+            // Exclude vowels
+            if (excludeVowels) {
+                characterSet = characterSet.replace(/[aeiouAEIOU]/g, '');
+            }
+
+            // Exclude ambiguous characters
+            if (excludeAmbiguous) {
+                characterSet = characterSet.replace(/[{}[\]()\/\\'"\~`,;:.<>]/g, '');
+            }
+
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * characterSet.length);
+                password += characterSet[randomIndex];
+            }
+            
+            document.getElementById('password-output').innerText = password;
+        }
+
+        function copyToClipboard() {
+            const passwordOutput = document.getElementById('password-output').innerText;
+            if (passwordOutput && passwordOutput !== 'Generated password will appear here...') {
+                navigator.clipboard.writeText(passwordOutput);
+                alert("Password copied to clipboard!");
+            } else {
+                alert("Generate a password first!");
+            }
+        }
+    </script>
+
+</body>
+</html>
